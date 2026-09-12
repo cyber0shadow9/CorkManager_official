@@ -1,0 +1,32 @@
+CORK MANAGER - BUILD INSTRUCTIONS
+
+OPTION 1: BUILD ON YOUR WINDOWS PC
+-----------------------------------
+1. Install Node.js LTS if you don't already have it:
+   https://nodejs.org/
+2. Open this folder.
+3. Double-click BUILD-WINDOWS.bat.
+4. Wait for "BUILD SUCCESSFUL".
+5. The installer will be in the new "dist" folder.
+
+If it fails, the script keeps the error visible instead of pretending the
+build succeeded. Copy the error text to ChatGPT for troubleshooting.
+
+OPTION 2: BUILD AUTOMATICALLY ON GITHUB
+---------------------------------------
+1. Create a GitHub repository.
+2. Upload the contents of this project to the repository.
+3. GitHub will recognize .github/workflows/build-windows.yml.
+4. Open the repository's Actions tab.
+5. Run "Build Windows Installer" with "Run workflow".
+6. When it finishes, open the workflow run and download the artifact named:
+   CorkManager-Windows-Installer
+
+For a tagged release, create/push a tag such as v1.2.1. The same workflow
+will run automatically.
+
+SECURITY
+--------
+The source in this package is the hardened version prepared earlier.
+The GitHub workflow only builds the repository; it does not grant the app
+extra permissions or install anything on your PC.

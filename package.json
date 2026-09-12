@@ -1,0 +1,66 @@
+{
+  "name": "cork-manager",
+  "version": "1.2.1",
+  "description": "Cork Manager — a cozy desktop corkboard for your to-do lists, with realistic textures, meme-cat pins, web image grabbing and a few well-hidden surprises.",
+  "homepage": "https://example.local/cork-manager",
+  "main": "main.js",
+  "author": {
+    "name": "You",
+    "email": "you@example.com"
+  },
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac",
+    "dist:linux": "electron-builder --linux",
+    "build:win": "electron-builder --win nsis",
+    "dist": "electron-builder --win nsis"
+  },
+  "devDependencies": {
+    "electron": "43.7.0",
+    "electron-builder": "26.16.1"
+  },
+  "build": {
+    "appId": "com.corkmanager.app",
+    "productName": "Cork Manager",
+    "asar": true,
+    "files": [
+      "main.js",
+      "preload.js",
+      "webpick-preload.js",
+      "src/**/*",
+      "assets/**/*"
+    ],
+    "directories": {
+      "buildResources": "assets",
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "Cork Manager",
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "installerHeaderIcon": "assets/icon.ico",
+      "deleteAppDataOnUninstall": false,
+      "perMachine": false
+    },
+    "electronLanguages": [
+      "en-US"
+    ]
+  }
+}

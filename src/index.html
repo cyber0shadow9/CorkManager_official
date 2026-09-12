@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' file: data: https:; media-src 'self' file: data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src https:;">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cork Manager</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="theme-cork">
+  <div class="frame" id="frame">
+    <!-- Top wooden bar with brand + window controls -->
+    <div class="topbar" id="dragbar">
+      <div class="brand" id="brandTap" title="Cork Manager" data-testid="brand-name">
+        <svg class="pin-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+          <path fill="#c93a3a" d="M14 2l8 8-4 1-3 3v6l-3-3-7 7 7-7-3-3H6l3-3 1-4 4-4z"/>
+        </svg>
+        <span>Cork Manager</span>
+      </div>
+      <div class="board-tabs" id="boardTabs" data-testid="board-tabs"></div>
+      <div class="win-controls">
+        <button class="wc-btn" id="btnPin" title="Pin to desktop" data-testid="pin-toggle-btn">
+          <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M14 2l8 8-4 1-3 3v6l-3-3-7 7 7-7-3-3H6l3-3 1-4 4-4z"/></svg>
+        </button>
+        <button class="wc-btn" id="btnSettings" title="Settings" data-testid="settings-btn">
+          <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 8a4 4 0 100 8 4 4 0 000-8zm9.4 4c0-.7-.1-1.4-.2-2l2-1.6-2-3.4-2.4.9c-1-.8-2.1-1.4-3.3-1.7L15 2H9l-.5 2.2c-1.2.3-2.3.9-3.3 1.7l-2.4-.9-2 3.4L2.8 10c-.1.6-.2 1.3-.2 2s.1 1.4.2 2l-2 1.6 2 3.4 2.4-.9c1 .8 2.1 1.4 3.3 1.7L9 22h6l.5-2.2c1.2-.3 2.3-.9 3.3-1.7l2.4.9 2-3.4-2-1.6c.1-.6.2-1.3.2-2z"/></svg>
+        </button>
+        <button class="wc-btn" id="btnMin" title="Minimize" data-testid="min-btn">–</button>
+        <button class="wc-btn danger" id="btnClose" title="Close" data-testid="close-btn">×</button>
+      </div>
+    </div>
+
+    <!-- Board area -->
+    <div class="board" id="board" data-testid="board">
+      <div class="board-header">
+        <input class="board-name" id="boardName" placeholder="Board name" data-testid="board-name-input" />
+        <div class="board-actions">
+          <button class="ghost" id="btnAddBoard" data-testid="add-board-btn">+ New board</button>
+          <button class="ghost danger-outline" id="btnDeleteBoard" data-testid="delete-board-btn">Delete board</button>
+        </div>
+      </div>
+
+      <div class="new-task-row">
+        <input id="newTaskInput" placeholder="Pin a new task…" data-testid="new-task-input" />
+        <button class="pill primary" id="btnAddTask" data-testid="add-task-btn">Pin it</button>
+      </div>
+
+      <div class="decor-bar">
+        <button class="pill sticker-btn" id="btnAddSticker" data-testid="add-sticker-btn">＋ Sticker</button>
+        <button class="pill photo-btn" id="btnAddPhoto" data-testid="add-photo-btn">＋ Photo</button>
+        <button class="pill web-btn" id="btnAddWeb" data-testid="add-web-btn">🌐 From web</button>
+        <span class="decor-hint">Drop stickers &amp; polaroids anywhere — drag to move ✨</span>
+      </div>
+
+      <div class="tasks" id="tasks" data-testid="tasks"></div>
+      <div class="empty" id="emptyState" data-testid="empty-state" hidden>
+        Nothing pinned yet. Add your first task above ✨
+      </div>
+      <div class="decor-layer" id="decorLayer" data-testid="decor-layer"></div>
+    </div>
+  </div>
+
+  <!-- Task editor modal -->
+  <div class="modal-backdrop" id="modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modal-head">
+        <span>Edit task</span>
+        <button class="wc-btn" id="modalClose" data-testid="modal-close-btn">×</button>
+      </div>
+      <div class="modal-body">
+        <label class="fld">
+          <span>Title</span>
+          <input id="editTitle" data-testid="edit-title-input" />
+        </label>
+        <label class="fld">
+          <span>Description</span>
+          <textarea id="editDesc" rows="4" placeholder="Notes, links, ideas…" data-testid="edit-desc-input"></textarea>
+        </label>
+
+        <div class="row">
+          <label class="fld">
+            <span>Category</span>
+            <select id="editCategory" data-testid="edit-category-select">
+              <option value="none">None</option>
+              <option value="work">Work</option>
+              <option value="home">Home</option>
+              <option value="urgent">Urgent</option>
+              <option value="idea">Idea</option>
+              <option value="fun">Fun</option>
+            </select>
+          </label>
+          <label class="fld">
+            <span>Color</span>
+            <input type="color" id="editColor" value="#fff4a3" data-testid="edit-color-input" />
+          </label>
+        </div>
+
+        <div class="row">
+          <label class="fld">
+            <span>Start date</span>
+            <div class="date-field">
+              <svg viewBox="0 0 24 24" width="16" height="16" class="cal-ico"><path fill="currentColor" d="M7 2h2v2h6V2h2v2h3v18H4V4h3V2zm13 8H4v10h16V10zM4 8h16V6H4v2z"/></svg>
+              <input type="date" id="editStart" data-testid="edit-start-input" />
+            </div>
+          </label>
+          <label class="fld">
+            <span>Due date</span>
+            <div class="date-field">
+              <svg viewBox="0 0 24 24" width="16" height="16" class="cal-ico"><path fill="currentColor" d="M7 2h2v2h6V2h2v2h3v18H4V4h3V2zm13 8H4v10h16V10zM4 8h16V6H4v2z"/></svg>
+              <input type="date" id="editDue" data-testid="edit-due-input" />
+            </div>
+          </label>
+        </div>
+
+        <div class="attach-block">
+          <div class="attach-head">
+            <span>Attachments</span>
+            <div>
+              <button class="ghost" id="btnAttachImages" data-testid="attach-images-btn">+ Images</button>
+              <button class="ghost" id="btnAttachFiles" data-testid="attach-files-btn">+ Files</button>
+            </div>
+          </div>
+          <div class="attach-list" id="attachList" data-testid="attach-list"></div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="pill danger-outline" id="btnDeleteTask" data-testid="delete-task-btn">Delete</button>
+        <div class="grow"></div>
+        <button class="ghost" id="btnCancelEdit">Cancel</button>
+        <button class="pill primary" id="btnSaveTask" data-testid="save-task-btn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings modal -->
+  <div class="modal-backdrop" id="settingsModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modal-head">
+        <span>Settings</span>
+        <button class="wc-btn" id="settingsClose" data-testid="settings-close-btn">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="mode-row">
+          <div>
+            <div class="mode-title">Realistic mode</div>
+            <div class="mode-sub">Old textures ⇄ real cork, wood, chalk, linen &amp; paper photos</div>
+          </div>
+          <label class="switch" title="Toggle realistic mode">
+            <input type="checkbox" id="setRealistic" data-testid="realistic-toggle" />
+            <span class="track"></span>
+          </label>
+        </div>
+
+        <label class="fld">
+          <span>Note holders</span>
+          <select id="setHolder" data-testid="holder-select">
+            <option value="mixed">Surprise me (pins + magnets + cats)</option>
+            <option value="pins">Thumbtacks only</option>
+            <option value="magnets">Magnets only</option>
+            <option value="cats">Cat memes only 🐱</option>
+          </select>
+        </label>
+
+        <div class="fld">
+          <span>Custom board background</span>
+          <div class="custom-bg-row">
+            <button class="ghost" id="btnCustomBg" data-testid="custom-bg-btn">Choose image…</button>
+            <button class="ghost" id="btnCustomBgWeb" data-testid="custom-bg-web-btn">🌐 From web…</button>
+            <button class="ghost danger-outline" id="btnClearBg" data-testid="clear-bg-btn">Clear</button>
+            <span class="hint" id="customBgName">Uses realistic cork when empty</span>
+          </div>
+        </div>
+
+        <label class="fld">
+          <span>Board texture</span>
+          <select id="setTheme" data-testid="theme-select">
+            <option value="cork">Classic cork</option>
+            <option value="darkcork">Dark cork</option>
+            <option value="chalk">Chalkboard</option>
+            <option value="linen">Linen</option>
+            <option value="paper">Warm paper</option>
+            <option value="solid">Solid color</option>
+          </select>
+          <span class="hint">Each texture has both an old (drawn) look and a Realistic photo version.</span>
+        </label>
+
+        <div class="row">
+          <label class="fld">
+            <span>Background color</span>
+            <input type="color" id="setBgColor" value="#7a4a24" data-testid="bg-color-input" />
+          </label>
+          <label class="fld">
+            <span>Frame color</span>
+            <input type="color" id="setFrameColor" value="#5a2f14" data-testid="frame-color-input" />
+          </label>
+        </div>
+
+        <label class="fld">
+          <span>Font</span>
+          <select id="setFont" data-testid="font-select">
+            <option value="marker">Handwritten (Permanent Marker)</option>
+            <option value="caveat">Caveat script</option>
+            <option value="rubik">Rubik (clean)</option>
+            <option value="serif">Classic serif</option>
+            <option value="mono">Monospace</option>
+          </select>
+        </label>
+
+        <div class="row">
+          <label class="fld chk">
+            <input type="checkbox" id="setStartupPinned" data-testid="startup-pin-toggle" />
+            <span>Start pinned to desktop</span>
+          </label>
+        </div>
+
+        <div class="fld">
+          <span>Board backup</span>
+          <div class="custom-bg-row">
+            <button class="ghost" id="btnExportBoards" data-testid="export-boards-btn">⤓ Export backup…</button>
+            <button class="ghost" id="btnImportBoards" data-testid="import-boards-btn">⤒ Import backup…</button>
+            <span class="hint">Save all boards &amp; settings to a file, then load it on another computer.</span>
+          </div>
+        </div>
+
+        <div class="paths">
+          <div class="paths-head">App locations</div>
+          <div class="path-row"><code id="pathSource">–</code>
+            <button class="ghost" id="btnOpenSource" data-testid="open-source-btn">Open source folder</button>
+          </div>
+          <div class="path-row"><code id="pathData">–</code>
+            <button class="ghost" id="btnOpenData" data-testid="open-data-btn">Open data folder</button>
+          </div>
+          <div class="path-row"><code id="pathAttach">–</code>
+            <button class="ghost" id="btnOpenAttach" data-testid="open-attach-btn">Open attachments</button>
+          </div>
+          <p class="hint">Tip: open the source folder to view or edit the code directly. Restart the app to see changes.</p>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="ghost danger-outline" id="btnResetAll" data-testid="reset-all-btn">Reset everything</button>
+        <div class="grow"></div>
+        <button class="pill primary" id="settingsDone" data-testid="settings-done-btn">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sticker picker modal -->
+  <div class="modal-backdrop" id="stickerModal" hidden>
+    <div class="modal sticker-modal" role="dialog" aria-modal="true">
+      <div class="modal-head">
+        <span>Add a sticker</span>
+        <button class="wc-btn" id="stickerClose" data-testid="sticker-close-btn">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="sticker-grid" id="stickerGrid" data-testid="sticker-grid"></div>
+      </div>
+      <div class="modal-foot">
+        <button class="ghost" id="btnStickerWeb" data-testid="sticker-web-btn">🌐 Browse web for cats…</button>
+        <button class="ghost" id="btnStickerUpload" data-testid="sticker-upload-btn">Upload custom sticker…</button>
+        <div class="grow"></div>
+        <button class="pill primary" id="stickerDone" data-testid="sticker-done-btn">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🤫 Super secret settings — opens when the app name is tapped 3× -->
+  <div class="modal-backdrop" id="secretModal" hidden>
+    <div class="modal secret-modal" role="dialog" aria-modal="true">
+      <div class="modal-head secret-head">
+        <span>🤫 Super Secret Settings</span>
+        <button class="wc-btn" id="secretClose" data-testid="secret-close-btn">×</button>
+      </div>
+      <div class="modal-body">
+        <p class="secret-intro">You found it! These control the hidden surprises baked into Cork Manager.</p>
+
+        <label class="fld chk secret-chk">
+          <input type="checkbox" id="setEasterEgg" data-testid="egg-toggle" />
+          <span>Enable rare surprise 🍔 — a spinning cat + chomp on ~1 in 50 task actions</span>
+        </label>
+
+        <label class="fld chk secret-chk">
+          <input type="checkbox" id="setMeow" data-testid="meow-toggle" />
+          <span>Random cat meow 🐱 — ~1 in 30 chance on any button tap</span>
+        </label>
+
+        <div class="secret-tests">
+          <div class="paths-head">Test the Easter eggs</div>
+          <div class="test-grid">
+            <button class="pill" id="testSurprise" data-testid="test-surprise-btn">Test surprise 🍔</button>
+            <button class="pill" id="testSpin" data-testid="test-spin-btn">Test spinning cat 🌀</button>
+            <button class="pill" id="testMeow" data-testid="test-meow-btn">Test meow 🐱</button>
+            <button class="pill" id="testConfetti" data-testid="test-confetti-btn">Test confetti 🎉</button>
+            <button class="pill" id="testParade" data-testid="test-parade-btn">Test cat parade 🐾</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <div class="grow"></div>
+        <button class="pill primary" id="secretDone" data-testid="secret-done-btn">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Easter egg overlay: spinning oiiai cat -->
+  <div class="egg-layer" id="eggLayer" aria-hidden="true">
+    <div class="egg-cat" id="eggCat">
+      <img src="oiiai-cat.svg" alt="" />
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
