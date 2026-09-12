@@ -27,12 +27,15 @@
     "productName": "Cork Manager",
     "asar": true,
     "files": [
-      "main.js",
-      "preload.js",
-      "webpick-preload.js",
-      "src/**/*",
-      "assets/**/*"
-    ],
+  "main.js",
+  "preload.js",
+  "webpick-preload.js",
+  "index.html",
+  "renderer.js",
+  "src/**/*",
+  "assets/**/*",
+  "package.json"
+],
     "directories": {
       "buildResources": "assets",
       "output": "dist"
